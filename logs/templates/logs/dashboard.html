@@ -1,0 +1,160 @@
+{% extends "logs/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="fw-bold">📊 SMS Analytics Dashboard</h2>
+
+    <!-- Filters -->
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Overview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Detailed Analytics</a>
+            </li>
+        </ul>
+        <input type="date" class="form-control w-auto" />
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total SMS</h5>
+                    <h2>100</h2>
+                    <span class="text-success">+20.1% from last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Successful Deliveries</h5>
+                    <h2 class="text-success">37</h2>
+                    <span class="text-success">+12.5% from last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Failed Deliveries</h5>
+                    <h2 class="text-danger">63</h2>
+                    <span class="text-danger">-3.2% from last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Success Rate</h5>
+                    <h2>37.0%</h2>
+                    <span class="text-success">+5.4% from last month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Graphs -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">SMS Delivery Overview</h5>
+                    <canvas id="smsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Status Distribution</h5>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Logs -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Logs</h5>
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold text-success">+1234567890</span>
+                                <p class="mb-0 text-muted">Endpoint: /api/sms/transactional</p>
+                            </div>
+                            <span class="badge bg-dark">delivered</span>
+                        </div>
+
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold text-danger">+1987654321</span>
+                                <p class="mb-0 text-muted">Endpoint: /api/sms/marketing</p>
+                                <span class="text-danger">Error: Invalid phone number</span>
+                            </div>
+                            <span class="badge bg-danger">failed</span>
+                        </div>
+
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold text-success">+1555555555</span>
+                                <p class="mb-0 text-muted">Endpoint: /api/sms/transactional</p>
+                            </div>
+                            <span class="badge bg-dark">delivered</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Scripts -->
+<script>
+    const smsCtx = document.getElementById("smsChart").getContext("2d");
+    new Chart(smsCtx, {
+        type: "line",
+        data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [
+                {
+                    label: "Successful SMS",
+                    data: [10, 25, 50, 75, 100, 120],
+                    borderColor: "green",
+                    fill: false,
+                },
+                {
+                    label: "Failed SMS",
+                    data: [20, 30, 40, 60, 80, 90],
+                    borderColor: "red",
+                    fill: false,
+                },
+            ],
+        },
+    });
+
+    const statusCtx = document.getElementById("statusChart").getContext("2d");
+    new Chart(statusCtx, {
+        type: "pie",
+        data: {
+            labels: ["Delivered", "Failed"],
+            datasets: [
+                {
+                    data: [37, 63],
+                    backgroundColor: ["green", "red"],
+                },
+            ],
+        },
+    });
+</script>
+{% endblock %}
