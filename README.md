@@ -35,3 +35,6 @@ App Not Accessible
 - Try restarting the container:  
   docker-compose down  
   docker-compose up --build -d 
+
+Image:
+  ![alt text](image.png)
