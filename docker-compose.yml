@@ -4,14 +4,19 @@ services:
   web:
     build: .
     command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py collectstatic --noinput &&
-             gunicorn your_project.wsgi:application --bind 0.0.0.0:10000"
+      sh -c "python manage.py makemigrations --noinput &&
+             python manage.py migrate --noinput &&
+             python manage.py seed_logs &&
+             gunicorn analytics_project.wsgi:application --bind 0.0.0.0:8000"
+    ports:
+      - "10000:8000"
+    #ran on port 10000 because other important containers were using port 8000 on Host
     environment:
-      - DB_HOST=db
+      - DB_HOST=db  #used to refer to the db container in the docker network
       - DB_PORT=5432
     depends_on:
       - db
+    restart: always
 
   db:
     image: postgres

@@ -1,160 +1,111 @@
 {% extends "logs/base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="fw-bold">📊 SMS Analytics Dashboard</h2>
+<div class="container">
+    <h1>📊 SMS Analytics Dashboard</h1>
 
-    <!-- Filters -->
-    <div class="d-flex justify-content-between align-items-center my-3">
-        <ul class="nav nav-pills">
-            <li class="nav-item">
-                <a class="nav-link active" href="#">Overview</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Detailed Analytics</a>
-            </li>
-        </ul>
-        <input type="date" class="form-control w-auto" />
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row g-3">
-        <div class="col-md-3">
+    <div class="row">
+        <div class="col-md-2">
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Total SMS</h5>
-                    <h2>100</h2>
-                    <span class="text-success">+20.1% from last month</span>
+                    <h2>{{ total_sms }}</h2>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-3">
+    
+        <div class="col-md-2">
             <div class="card text-center shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Successful Deliveries</h5>
-                    <h2 class="text-success">37</h2>
-                    <span class="text-success">+12.5% from last month</span>
+                    <h5 class="card-title">Successful</h5>
+                    <h2 class="text-success">{{ successful_deliveries }}</h2>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-3">
+    
+        <div class="col-md-2">
             <div class="card text-center shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Failed Deliveries</h5>
-                    <h2 class="text-danger">63</h2>
-                    <span class="text-danger">-3.2% from last month</span>
+                    <h5 class="card-title">Failed</h5>
+                    <h2 class="text-danger">{{ failed_deliveries }}</h2>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-3">
+    
+        <div class="col-md-2">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Pending</h5>
+                    <h2 class="text-secondary">{{ pending_deliveries }}</h2>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-md-2">
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Success Rate</h5>
-                    <h2>37.0%</h2>
-                    <span class="text-success">+5.4% from last month</span>
+                    <h2>{{ success_rate }}%</h2>
                 </div>
             </div>
         </div>
     </div>
+    
 
-    <!-- Analytics Graphs -->
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">SMS Delivery Overview</h5>
-                    <canvas id="smsChart"></canvas>
-                </div>
-            </div>
-        </div>
+    <h2 class="mt-4">📜 All Logs</h2>
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>📱 Phone</th>
+                <th>📍 Endpoint</th>
+                <th>Status</th>
+                <th>🕒 Created At</th>
+                <th>Error Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs_page %}
+            <tr>
+                <td>{{ log.phone }}</td>
+                <td>{{ log.endpoint }}</td>
+                <td>
+                    {% if log.status == "success" %}
+                        <span class="badge bg-success">✔ Success</span>
+                    {% elif log.status == "failed" %}
+                        <span class="badge bg-danger">✖ Failed</span>
+                    {% elif log.status == "pending" %}
+                        <span class="badge bg-secondary">⏳ Pending</span>
+                    {% else %}
+                        <span class="badge bg-dark">{{ log.status }}</span>  <!-- Default for unknown statuses -->
+                    {% endif %}
+                </td>
+                <td>{{ log.created_at }}</td>
+                <td>{{ log.error_message|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No logs available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
 
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Status Distribution</h5>
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Pagination Controls -->
+    <nav aria-label="Log Pagination">
+        <ul class="pagination">
+            {% if logs_page.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ logs_page.previous_page_number }}">Previous</a></li>
+            {% endif %}
 
-    <!-- Recent Logs -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Recent Logs</h5>
-                    <div class="list-group">
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="fw-bold text-success">+1234567890</span>
-                                <p class="mb-0 text-muted">Endpoint: /api/sms/transactional</p>
-                            </div>
-                            <span class="badge bg-dark">delivered</span>
-                        </div>
+            <li class="page-item active"><span class="page-link">Page {{ logs_page.number }} of {{ logs_page.paginator.num_pages }}</span></li>
 
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="fw-bold text-danger">+1987654321</span>
-                                <p class="mb-0 text-muted">Endpoint: /api/sms/marketing</p>
-                                <span class="text-danger">Error: Invalid phone number</span>
-                            </div>
-                            <span class="badge bg-danger">failed</span>
-                        </div>
-
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="fw-bold text-success">+1555555555</span>
-                                <p class="mb-0 text-muted">Endpoint: /api/sms/transactional</p>
-                            </div>
-                            <span class="badge bg-dark">delivered</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            {% if logs_page.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ logs_page.next_page_number }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ logs_page.paginator.num_pages }}">Last</a></li>
+            {% endif %}
+        </ul>
+    </nav>
 </div>
-
-<!-- Chart.js Scripts -->
-<script>
-    const smsCtx = document.getElementById("smsChart").getContext("2d");
-    new Chart(smsCtx, {
-        type: "line",
-        data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            datasets: [
-                {
-                    label: "Successful SMS",
-                    data: [10, 25, 50, 75, 100, 120],
-                    borderColor: "green",
-                    fill: false,
-                },
-                {
-                    label: "Failed SMS",
-                    data: [20, 30, 40, 60, 80, 90],
-                    borderColor: "red",
-                    fill: false,
-                },
-            ],
-        },
-    });
-
-    const statusCtx = document.getElementById("statusChart").getContext("2d");
-    new Chart(statusCtx, {
-        type: "pie",
-        data: {
-            labels: ["Delivered", "Failed"],
-            datasets: [
-                {
-                    data: [37, 63],
-                    backgroundColor: ["green", "red"],
-                },
-            ],
-        },
-    });
-</script>
 {% endblock %}
